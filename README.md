@@ -136,13 +136,18 @@ You should submit the Fork link.
   - As a user, I want to get the favorite genre of a given Actor. Business Rule: the favorite genre is the one with the most appearances.
     - GET /actors/{id}/favourite-genre'
 
+
+
   2. View Actor's number of Movies in Genres 
    - As a user, I want to get the number of movies by genre on an actor profile page.
     - GET /actors/{id}/movies-by-genre
 
+ 
   3. View Actors in a Genre 
     - As a user, I want to get a list of actors for a given Genre ordered by movie appearances.
       - GET /genres/{id}/actors-by-movies
+
+
 
 - MG-0006. View Actor's character names
   - As a user, I want to get a list of character names of a given Actor.
