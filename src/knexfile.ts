@@ -20,6 +20,7 @@ const knexConfig: Config = {
   migrations: {
     directory: './db/migrations'
   }
+
 }
 
 export default knexConfig

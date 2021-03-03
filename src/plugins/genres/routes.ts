@@ -56,6 +56,11 @@ export const genreRoutes: ServerRoute[] = [{
   path: '/genres/{id}',
   handler: remove,
   options: { validate: validateParamsId },
+},{
+  method: 'GET',
+  path: '/genres/{id}/actors-by-movies',
+  handler: listActorsByMovieAppearances,
+  options: { validate: validateParamsId },
 },]
 
 
@@ -104,4 +109,10 @@ async function remove(req: Request, h: ResponseToolkit, _err?: Error): Promise<L
   const { id } = (req.params as ParamsId)
 
   return await genres.remove(id) ? h.response().code(204) : Boom.notFound()
+}
+
+async function listActorsByMovieAppearances(req: Request, _h: ResponseToolkit, _err?: Error): Promise<Lifecycle.ReturnValue> {
+  const { id } = (req.params as ParamsId)
+  const found = await genres.listActorsByMovieAppearances(id)
+  return found || Boom.notFound()
 }

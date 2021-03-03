@@ -100,3 +100,50 @@ The solution should successfully build using `$ docker-compose build` and should
 ## Submitting
 
 You should submit the Fork link.
+
+## Resources Available
+
+- MG-0001 Add Genre CRUD
+  - POST /genres
+  - GET /genres
+  - GET /genres/:id
+  - PUT /genres/:id
+  - DELETE /genres/:id
+
+- MG-0002 Add Movie CRUD
+  - POST /movies
+  - GET /movies
+  - GET /movies/:id
+  - PUT /movies/:id
+  - DELETE /movies/:id
+  - POST /movies/{id}/characters
+  - GET /movies/{id}/characters
+
+- MG-0003 Add Actor CRUD
+  - POST /actors
+  - GET /actors
+  - GET /actors/:id
+  - PUT /actors/:id
+  - DELETE /actosr/:id
+
+
+- MG-0004 View Actor's movie appearances
+  - As a user, I want to get a list of movies that a given Actor starred on.
+    - GET /actors/{actorID}/movies
+
+- MG-0005. Select one of the following:
+  1. View Actor's favorite genre 
+  - As a user, I want to get the favorite genre of a given Actor. Business Rule: the favorite genre is the one with the most appearances.
+    - GET /actors/{id}/favourite-genre'
+
+  2. View Actor's number of Movies in Genres 
+   - As a user, I want to get the number of movies by genre on an actor profile page.
+    - GET /actors/{id}/movies-by-genre
+
+  3. View Actors in a Genre 
+    - As a user, I want to get a list of actors for a given Genre ordered by movie appearances.
+      - GET /genres/{id}/actors-by-movies
+
+- MG-0006. View Actor's character names
+  - As a user, I want to get a list of character names of a given Actor.
+    - GET /actors/1/characters

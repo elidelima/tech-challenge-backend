@@ -6,10 +6,10 @@ export const lab = script()
 const { beforeEach, before, after, afterEach, describe, it } = lab
 
 import * as Hapi from '@hapi/hapi'
-import { genre as plugin } from './index'
-import * as lib from '../../lib/genres'
+import { movie as plugin } from './index'
+import * as lib from '../../lib/movies'
 
-describe('plugin', () => describe('genre', () => {
+describe('plugin', () => describe('movie', () => {
   const sandbox = Object.freeze(sinon.createSandbox())
 
   const isContext = (value: unknown): value is Context => {
@@ -34,8 +34,6 @@ describe('plugin', () => describe('genre', () => {
       lib_remove: sandbox.stub(lib, 'remove'),
       lib_create: sandbox.stub(lib, 'create'),
       lib_update: sandbox.stub(lib, 'update'),
-      lib_listActorsByMovieAppearances: sandbox.stub(lib, 'listActorsByMovieAppearances'),
-
     }
 
     // all stubs must be made before server starts
@@ -58,10 +56,10 @@ describe('plugin', () => describe('genre', () => {
   afterEach(() => sandbox.resetHistory())
   after(() => sandbox.restore())
 
-  describe('GET /genres', () => {
-    const [method, url] = ['GET', '/genres']
+  describe('GET /movies', () => {
+    const [method, url] = ['GET', '/movies']
 
-    it('returns all genres', async ({ context }: Flags) => {
+    it('returns all movies', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
       const opts: Hapi.ServerInjectOptions = { method, url }
       const anyResult = [{'any': 'result'}]
@@ -76,8 +74,8 @@ describe('plugin', () => describe('genre', () => {
 
   })
 
-  describe('POST /genres', () => {
-    const [method, url] = ['POST', '/genres']
+  describe('POST /movies', () => {
+    const [method, url] = ['POST', '/movies']
 
     it('validates payload is not empty', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
@@ -88,7 +86,7 @@ describe('plugin', () => describe('genre', () => {
       expect(response.statusCode).equals(400)
     })
 
-    it('validates payload matches `genre`', async ({ context }: Flags) => {
+    it('validates payload matches `movie`', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
       const payload = {'some': 'object'}
       const opts: Hapi.ServerInjectOptions = { method, url, payload}
@@ -99,7 +97,9 @@ describe('plugin', () => describe('genre', () => {
 
     it('returns HTTP 409 when given `name` already exists', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
-      const payload = {'name': 'repeated-name'}
+      const payload = {
+        'name': 'repeated-name', 'releasedAt': new Date('2000-04-01'), 'runtime': 90, 'genreId': 1, 'synopsis': 'test sinopsys'
+      }
       const opts: Hapi.ServerInjectOptions = { method, url, payload }
       context.stub.lib_create.rejects({ code: 'ER_DUP_ENTRY'})
 
@@ -109,7 +109,9 @@ describe('plugin', () => describe('genre', () => {
 
     it('returns HTTP 201, with the `id` and `path` to the row created', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
-      const payload = {'name': 'any-name'}
+      const payload = {
+        'name': 'any-name', 'releasedAt': new Date('2000-04-01'), 'runtime': 90, 'genreId': 1, 'synopsis': 'test sinopsys'
+      }
       const opts: Hapi.ServerInjectOptions = { method, url, payload }
       const anyResult = 123
       context.stub.lib_create.resolves(anyResult)
@@ -117,18 +119,18 @@ describe('plugin', () => describe('genre', () => {
       const response = await context.server.inject(opts)
       expect(response.statusCode).equals(201)
 
-      sinon.assert.calledOnceWithExactly(context.stub.lib_create, payload.name)
+      sinon.assert.calledOnceWithExactly(context.stub.lib_create, payload.name, payload.releasedAt, payload.runtime, payload.genreId, payload.synopsis)
       expect(response.result).equals({
         id: anyResult,
-        path: `/genres/${anyResult}`
+        path: `/movies/${anyResult}`
       })
     })
 
   })
 
-  describe('GET /genres/:id', () => {
+  describe('GET /movies/:id', () => {
     const paramId = 123
-    const [method, url] = ['GET', `/genres/${paramId}`]
+    const [method, url] = ['GET', `/movies/${paramId}`]
 
     it('validates :id is numeric', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
@@ -147,7 +149,7 @@ describe('plugin', () => describe('genre', () => {
       expect(response.statusCode).equals(404)
     })
 
-    it('returns one genre', async ({ context }: Flags) => {
+    it('returns one movie', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
       const opts: Hapi.ServerInjectOptions = { method, url }
       const anyResult = {'any': 'result'}
@@ -162,9 +164,19 @@ describe('plugin', () => describe('genre', () => {
 
   })
 
-  describe('PUT /genres/:id', () => {
+  describe('PUT /movies/:id', () => {
     const paramId = 123
-    const [method, url, payload] = ['PUT', `/genres/${paramId}`, {'name': 'any-name'}]
+    const [method, url, payload] = [
+      'PUT',
+      `/movies/${paramId}`,
+      {
+        'name': 'any-name',
+        'releasedAt': new Date('2000-04-01'),
+        'runtime': '90',
+        'genreId': '1',
+        'synopsis': 'test sinopsys'
+      }
+    ]
 
     it('validates payload is not empty', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
@@ -174,7 +186,7 @@ describe('plugin', () => describe('genre', () => {
       expect(response.statusCode).equals(400)
     })
 
-    it('validates payload matches `genre`', async ({ context }: Flags) => {
+    it('validates payload matches `movie`', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
       const opts: Hapi.ServerInjectOptions = { method, url, payload: {'unexpected': 'object'}}
 
@@ -200,6 +212,14 @@ describe('plugin', () => describe('genre', () => {
       expect(response.statusCode).equals(409)
     })
 
+    it('returns HTTP 500 when given `genreId` does not exist', async ({ context }: Flags) => {
+      if(!isContext(context)) throw TypeError()
+      const opts: Hapi.ServerInjectOptions = { method, url, payload }
+
+      const response = await context.server.inject(opts)
+      expect(response.statusCode).equals(500)
+    })
+
     it('returns HTTP 204', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
       const opts: Hapi.ServerInjectOptions = { method, url, payload }
@@ -208,16 +228,13 @@ describe('plugin', () => describe('genre', () => {
 
       const response = await context.server.inject(opts)
       expect(response.statusCode).equals(204)
-
-      sinon.assert.calledOnceWithExactly(context.stub.lib_update, paramId, payload.name)
-      expect(response.result).to.be.null()
     })
 
   })
 
-  describe('DELETE /genres/:id', () => {
+  describe('DELETE /movies/:id', () => {
     const paramId = 123
-    const [method, url] = ['DELETE', `/genres/${paramId}`]
+    const [method, url] = ['DELETE', `/movies/${paramId}`]
 
     it('validates :id is numeric', async ({ context }: Flags) => {
       if(!isContext(context)) throw TypeError()
